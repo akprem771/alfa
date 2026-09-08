@@ -1,0 +1,889 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(circle at 15% 10%, #6366f1 0%, transparent 30%),
+    radial-gradient(circle at 85% 85%, #2563eb 0%, transparent 30%),
+    linear-gradient(135deg, #0f172a, #1e3a8a);
+  color: #fff;
+  margin: 0;
+  min-height: 100vh;
+  padding: 25px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* =====================================================
+   🔐 LOGIN
+===================================================== */
+
+.login-container {
+  width: 380px;
+  max-width: 95%;
+  margin: 70px auto;
+  padding: 35px 28px;
+  background: rgba(255, 255, 255, 0.97);
+  color: #222;
+  border-radius: 25px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  transform: perspective(900px) rotateX(3deg);
+  transition: 0.3s ease;
+}
+
+.login-container:hover {
+  transform: perspective(900px) rotateX(0deg) translateY(-5px);
+}
+
+.login-icon {
+  font-size: 55px;
+  margin-bottom: 5px;
+}
+
+.login-container h2 {
+  margin: 5px 0;
+  font-size: 27px;
+}
+
+.login-subtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.login-container input {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  outline: none;
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+.login-container input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.login-container button {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* =====================================================
+   🔘 BUTTONS
+===================================================== */
+
+button {
+  border: none;
+  padding: 11px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.25s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.22);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  filter: none;
+}
+
+/* =====================================================
+   🔵 PRIMARY BUTTONS
+===================================================== */
+
+.login-container button,
+.next-btn,
+.save-btn,
+.start-quiz-btn {
+  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  color: white;
+}
+
+/* =====================================================
+   🧠 MAIN AREA
+===================================================== */
+
+#quizArea {
+  width: 100%;
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* =====================================================
+   👤 TOP BAR
+===================================================== */
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.top-bar h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+/* =====================================================
+   🚪 LOGOUT
+===================================================== */
+
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  min-width: 110px;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+}
+
+/* =====================================================
+   📌 SECTION TITLE
+===================================================== */
+
+.section-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 20px 0 12px;
+}
+
+/* =====================================================
+   📚 QUIZ LIST
+===================================================== */
+
+.quiz-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+/* =====================================================
+   🃏 CARDS
+===================================================== */
+
+.quiz-card,
+.admin-card,
+.saved-quiz,
+.question-card {
+  background: rgba(255, 255, 255, 0.97);
+  color: #222;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+.quiz-card {
+  transition: 0.3s ease;
+}
+
+.quiz-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* =====================================================
+   🧠 QUIZ CARD HEADER
+===================================================== */
+
+.quiz-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.quiz-card-header h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/* =====================================================
+   🟢 STATUS
+===================================================== */
+
+.status {
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  height: fit-content;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.live {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.waiting,
+.upcoming {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.finished,
+.expired {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* =====================================================
+   📋 QUIZ DETAILS
+===================================================== */
+
+.quiz-details p {
+  margin: 8px 0;
+  color: #555;
+}
+
+.quiz-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.start-quiz-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.result-btn,
+.view-result-admin {
+  background: #f59e0b;
+  color: white;
+}
+
+/* =====================================================
+   📝 QUESTION
+===================================================== */
+
+.question-card {
+  margin: 25px auto;
+  max-width: 750px;
+}
+
+.question-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.question-card h2 {
+  line-height: 1.5;
+  color: #222;
+}
+
+/* =====================================================
+   🔘 OPTIONS
+===================================================== */
+
+.options {
+  margin: 20px 0;
+}
+
+.option {
+  display: block;
+  padding: 15px;
+  margin: 10px 0;
+  background: #f3f4f6;
+  color: #222;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.option:hover {
+  background: #e0e7ff;
+  border-color: #818cf8;
+  transform: translateX(3px);
+}
+
+.option input {
+  margin-right: 10px;
+  accent-color: #4f46e5;
+}
+
+/* =====================================================
+   ⏱️ QUESTION TIMER
+===================================================== */
+
+.question-timer {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 10px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.next-btn {
+  width: 100%;
+}
+
+/* =====================================================
+   👥 MEMBER COUNT
+===================================================== */
+
+.member-count {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  border-radius: 12px;
+  margin: 15px 0;
+  text-align: center;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* =====================================================
+   🏆 RESULTS
+===================================================== */
+
+.results-box {
+  background: rgba(255, 255, 255, 0.97);
+  color: #222;
+  padding: 20px;
+  border-radius: 20px;
+  margin-top: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.results-box h3 {
+  margin-top: 0;
+  color: #111827;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin: 7px 0;
+  background: #f3f4f6;
+  border-radius: 10px;
+  color: #222;
+}
+
+.result-row strong {
+  color: #2563eb;
+}
+
+/* =====================================================
+   🥇 TOP THREE
+===================================================== */
+
+.result-row:nth-child(2) {
+  border-left: 5px solid #f59e0b;
+}
+
+.result-row:nth-child(3) {
+  border-left: 5px solid #94a3b8;
+}
+
+.result-row:nth-child(4) {
+  border-left: 5px solid #b45309;
+}
+
+/* =====================================================
+   👨‍💼 ADMIN
+===================================================== */
+
+.admin-panel {
+  margin-top: 30px;
+}
+
+.admin-card {
+  margin-bottom: 20px;
+}
+
+.admin-card h3 {
+  margin-top: 0;
+  color: #111827;
+}
+
+/* =====================================================
+   📝 ADMIN INPUTS
+===================================================== */
+
+.admin-card input,
+.admin-card select,
+.admin-card textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.admin-card textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.admin-card input:focus,
+.admin-card select:focus,
+.admin-card textarea:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* =====================================================
+   📐 FORM GRID
+===================================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.form-grid label {
+  display: block;
+  font-weight: 600;
+  margin-top: 5px;
+  color: #374151;
+}
+
+/* =====================================================
+   👨‍🎓 STUDENT MANAGEMENT
+===================================================== */
+
+#studentList {
+  margin-top: 15px;
+}
+
+.student-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 15px;
+  color: #222;
+}
+
+.student-info {
+  flex: 1;
+}
+
+.student-info h4 {
+  margin: 0 0 5px;
+}
+
+.student-info p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.student-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+/* =====================================================
+   ✏️ STUDENT EDIT
+===================================================== */
+
+.edit-student {
+  background: #3b82f6;
+  color: white;
+}
+
+/* =====================================================
+   🗑️ STUDENT DELETE
+===================================================== */
+
+.delete-student {
+  background: #ef4444;
+  color: white;
+}
+
+/* =====================================================
+   👨‍💼 ADMIN QUESTION
+===================================================== */
+
+.admin-question {
+  position: relative;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  color: #222;
+}
+
+.admin-question h4 {
+  margin-top: 0;
+}
+
+.remove-question {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+}
+
+/* =====================================================
+   ➕ ADD QUESTION
+===================================================== */
+
+.add-question-btn {
+  width: 100%;
+  margin-top: 10px;
+  background: #10b981;
+  color: white;
+}
+
+.add-question-btn:hover {
+  background: #059669;
+}
+
+/* =====================================================
+   💾 ADMIN ACTIONS
+===================================================== */
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.save-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.cancel-btn {
+  background: #6b7280;
+  color: white;
+}
+
+/* =====================================================
+   📚 SAVED QUIZ
+===================================================== */
+
+.saved-quiz {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.saved-quiz h4 {
+  margin: 0 0 5px;
+  color: #111827;
+}
+
+.saved-quiz p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.saved-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.edit-quiz {
+  background: #3b82f6;
+  color: white;
+}
+
+.delete-quiz {
+  background: #ef4444;
+  color: white;
+}
+
+/* =====================================================
+   🔄 RESET
+===================================================== */
+
+.reset-btn {
+  width: 100%;
+  margin-top: 10px;
+  background: #dc2626;
+  color: white;
+}
+
+.reset-btn:hover {
+  background: #b91c1c;
+}
+
+/* =====================================================
+   📭 EMPTY
+===================================================== */
+
+.empty-box {
+  background: rgba(255, 255, 255, 0.9);
+  color: #555;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+/* =====================================================
+   ⏳ COUNTDOWN
+===================================================== */
+
+.countdown-box {
+  background: rgba(255, 255, 255, 0.96);
+  color: #222;
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 600px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+.countdown-box h2 {
+  margin-top: 0;
+}
+
+.countdown {
+  font-size: 35px;
+  font-weight: 800;
+  color: #2563eb;
+  margin: 10px 0;
+}
+
+/* =====================================================
+   📊 PROGRESS
+===================================================== */
+
+.progress-container {
+  width: 100%;
+  height: 9px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4f46e5, #2563eb);
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+/* =====================================================
+   🎯 SELECTED OPTION
+===================================================== */
+
+.option.selected {
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+/* =====================================================
+   ⚠️ ALERT / MESSAGE
+===================================================== */
+
+.message,
+.alert-box {
+  padding: 12px 15px;
+  border-radius: 12px;
+  margin: 12px 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* =====================================================
+   📱 MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  body {
+    padding: 12px;
+  }
+
+  .login-container {
+    margin: 40px auto;
+    padding: 30px 20px;
+  }
+
+  .top-bar {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .top-bar h2 {
+    font-size: 19px;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+
+  .quiz-list {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-quiz {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .saved-actions button {
+    flex: 1;
+  }
+
+  .student-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-actions {
+    width: 100%;
+  }
+
+  .student-actions button {
+    flex: 1;
+  }
+
+  .question-card {
+    margin: 15px auto;
+    padding: 16px;
+  }
+
+  .question-top {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .quiz-card-header {
+    flex-direction: column;
+  }
+
+  .quiz-card-actions {
+    flex-direction: column;
+  }
+
+  .quiz-card-actions button {
+    width: 100%;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+  }
+
+  .admin-actions button {
+    width: 100%;
+  }
+
+  .result-row {
+    font-size: 14px;
+  }
+
+  .countdown {
+    font-size: 28px;
+  }
+}
+
+/* =====================================================
+   📱 VERY SMALL SCREEN
+===================================================== */
+
+@media (max-width: 380px) {
+
+  body {
+    padding: 8px;
+  }
+
+  .login-container {
+    width: 100%;
+  }
+
+  .quiz-card,
+  .admin-card,
+  .saved-quiz,
+  .question-card,
+  .results-box {
+    padding: 15px;
+  }
+
+  button {
+    padding: 10px 13px;
+    font-size: 13px;
+  }
+}

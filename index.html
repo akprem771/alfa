@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>3D Quiz System</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ================================================= -->
+  <!-- 🔐 LOGIN -->
+  <!-- ================================================= -->
+
+  <div id="loginBox" class="login-container">
+
+    <div class="login-icon hans-sitar">
+  <span class="hans-right">🦢</span>
+</div>
+
+    <h2>जय माँ सरस्वती</h2>
+
+    <p class="login-subtitle">
+      class 5th to 8th
+    </p>
+
+    <input
+      id="code"
+      type="text"
+      placeholder="Student Code"
+      autocomplete="off"
+    >
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      autocomplete="off"
+    >
+
+    <button
+      id="loginBtn"
+      type="button">
+      🔐 Login
+    </button>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- 🧠 MAIN AREA -->
+  <!-- ================================================= -->
+
+  <div id="quizArea" class="hidden">
+
+    <!-- ================================================= -->
+    <!-- 👤 TOP BAR -->
+    <!-- ================================================= -->
+
+    <div class="top-bar">
+
+      <div>
+        <h2 id="studentName">
+          Welcome
+        </h2>
+      </div>
+
+      <!-- Logout सभी users के लिए -->
+      <button
+        id="logoutBtn"
+        class="logout-btn"
+        type="button">
+        🚪 Logout
+      </button>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 👨‍🎓 STUDENT AREA -->
+    <!-- ================================================= -->
+
+    <div id="studentSection">
+
+      <div class="section-title">
+        📚 Available Quizzes
+      </div>
+
+      <div
+        id="studentQuizList"
+        class="quiz-list">
+
+        <p>
+          Loading quizzes...
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 📝 CURRENT QUIZ -->
+    <!-- ================================================= -->
+
+    <div id="quiz"></div>
+
+
+    <!-- ================================================= -->
+    <!-- 👥 MEMBERS -->
+    <!-- ================================================= -->
+
+    <div
+      id="memberCount"
+      class="member-count">
+
+      Live Members: 0
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 🏆 RESULTS -->
+    <!-- ================================================= -->
+
+    <div
+      id="results"
+      class="results-box">
+
+      <h3>
+        🏆 Live Quiz Results
+      </h3>
+
+      <p>
+        Quiz select करने के बाद result यहाँ दिखाई देगा।
+      </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 👨‍💼 ADMIN PANEL -->
+    <!-- ================================================= -->
+
+    <div
+      id="adminPanel"
+      class="admin-panel hidden">
+
+
+      <!-- ================================================= -->
+      <!-- 🧠 QUIZ MANAGEMENT -->
+      <!-- ================================================= -->
+
+      <div class="section-title">
+        🧠 Quiz Management
+      </div>
+
+
+      <div class="admin-card">
+
+        <h3 id="formTitle">
+          ➕ Create New Quiz
+        </h3>
+
+
+        <input
+          id="quizTitle"
+          type="text"
+          placeholder="Quiz का नाम"
+        >
+
+
+        <div class="form-grid">
+
+          <div>
+
+            <label>
+              📅 Quiz Date
+            </label>
+
+            <input
+              id="quizDate"
+              type="date"
+            >
+
+          </div>
+
+
+          <div>
+
+            <label>
+              🟢 Start Time
+            </label>
+
+            <input
+              id="quizStart"
+              type="time"
+            >
+
+          </div>
+
+
+          <div>
+
+            <label>
+              🔴 End Time
+            </label>
+
+            <input
+              id="quizEnd"
+              type="time"
+            >
+
+          </div>
+
+
+          <div>
+
+            <label>
+              ⏱️ Question Time
+            </label>
+
+            <input
+              id="questionTime"
+              type="number"
+              min="5"
+              value="15"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- ❓ QUESTIONS -->
+        <!-- ================================================= -->
+
+        <h3 class="question-heading">
+          ❓ Questions
+        </h3>
+
+
+        <div id="adminQuestions">
+          <!-- Questions यहाँ आएंगे -->
+        </div>
+
+
+        <button
+          id="addQuestionBtn"
+          type="button"
+          class="add-question-btn">
+
+          ➕ Add Question
+
+        </button>
+
+
+        <div class="admin-actions">
+
+          <button
+            id="saveQuizBtn"
+            type="button"
+            class="save-btn">
+
+            💾 Save Quiz
+
+          </button>
+
+
+          <button
+            id="cancelEditBtn"
+            type="button"
+            class="cancel-btn hidden">
+
+            ❌ Cancel Edit
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- 📚 SAVED QUIZZES -->
+      <!-- ================================================= -->
+
+      <div class="admin-card">
+
+        <h3>
+          📚 Saved Quizzes
+        </h3>
+
+        <div id="savedQuizList">
+
+          <p>
+            Loading saved quizzes...
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- 🔄 RESET RESULTS -->
+      <!-- ================================================= -->
+
+      <button
+        id="resetBtn"
+        class="reset-btn"
+        type="button">
+
+        🔄 Reset Selected Quiz Results
+
+      </button>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- 🧠 QUIZ JS -->
+  <!-- ================================================= -->
+
+  <script src="quiz.js"></script>
+
+
+  <!-- ================================================= -->
+  <!-- 🔥 FIREBASE MAIN JS -->
+  <!-- ================================================= -->
+
+  <script
+    type="module"
+    src="main.js">
+  </script>
+
+</body>
+
+</html>
