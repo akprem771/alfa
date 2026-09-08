@@ -1,5 +1,5 @@
 // =====================================================
-// 🔥 FIREBASE
+// 🔥 FIREBASE IMPORTS
 // =====================================================
 
 import {
@@ -10,6 +10,7 @@ import {
   getDatabase,
   ref,
   onValue,
+  get,
   set,
   remove
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -34,11 +35,8 @@ const firebaseConfig = {
 // 🚀 INITIALIZE FIREBASE
 // =====================================================
 
-const app =
-  initializeApp(firebaseConfig);
-
-const db =
-  getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 
 // =====================================================
@@ -46,28 +44,15 @@ const db =
 // =====================================================
 
 function listenQuizzes(callback) {
-
-  const quizzesRef =
-    ref(db, "quizzes");
+  const quizzesRef = ref(db, "quizzes");
 
   onValue(
     quizzesRef,
-
     snapshot => {
-
-      callback(
-        snapshot.val() || {}
-      );
-
+      callback(snapshot.val() || {});
     },
-
     error => {
-
-      console.error(
-        "❌ Quiz Firebase Error:",
-        error
-      );
-
+      console.error("❌ Quiz Firebase Error:", error);
       callback({});
     }
   );
@@ -75,37 +60,21 @@ function listenQuizzes(callback) {
 
 
 // =====================================================
-// 👨‍🎓 STUDENT LISTENER
+// 👨🎓 STUDENT LISTENER
 // =====================================================
 
 function listenStudents(callback) {
-
-  const studentsRef =
-    ref(db, "students");
+  const studentsRef = ref(db, "students");
 
   onValue(
     studentsRef,
-
     snapshot => {
-
-      const data =
-        snapshot.val() || {};
-
+      const data = snapshot.val() || {};
       callback(data);
-
-      console.log(
-        "✅ Students loaded from Firebase:",
-        data
-      );
+      console.log("✅ Students loaded from Firebase:", data);
     },
-
     error => {
-
-      console.error(
-        "❌ Student Firebase Error:",
-        error
-      );
-
+      console.error("❌ Student Firebase Error:", error);
       callback({});
     }
   );
@@ -113,209 +82,77 @@ function listenStudents(callback) {
 
 
 // =====================================================
-// ➕ CREATE / UPDATE STUDENT
+// ➕ CREATE / UPDATE STUDENT (FIXED DOUBLE-SAVE LOCK)
 // =====================================================
 
-async function saveStudentToFirebase(
-  student,
-  oldCode = null
-) {
+let isSavingStudent = false;
+
+async function saveStudentToFirebase(student, oldCode = null) {
+  if (isSavingStudent) {
+    console.warn("⚠️ Already saving student, duplicate call prevented.");
+    return false;
+  }
+
+  isSavingStudent = true;
 
   try {
-
     if (!student) {
-
-      alert(
-        "❌ Student data नहीं मिला।"
-      );
-
+      alert("❌ Student data नहीं मिला।");
       return false;
     }
 
+    const newCode = String(student.code || "").trim().toUpperCase();
+    const name = String(student.name || "").trim();
+    const password = String(student.password || "").trim();
 
-    const newCode =
-      String(
-        student.code || ""
-      )
-        .trim()
-        .toUpperCase();
-
-
-    const name =
-      String(
-        student.name || ""
-      )
-        .trim();
-
-
-    const password =
-      String(
-        student.password || ""
-      )
-        .trim();
-
-
-    if (
-      !newCode ||
-      !name ||
-      !password
-    ) {
-
-      alert(
-        "❌ Name, Code और Password जरूरी हैं।"
-      );
-
+    if (!newCode || !name || !password) {
+      alert("❌ Name, Code और Password जरूरी हैं।");
       return false;
     }
 
+    const old = oldCode ? String(oldCode).trim().toUpperCase() : null;
 
     // =================================================
-    // 🔍 OLD CODE
+    // 🔍 DUPLICATE CODE CHECK USING OFFICIAL `get()`
     // =================================================
+    if (old !== newCode) {
+      const studentRef = ref(db, `students/${newCode}`);
+      const existingSnapshot = await get(studentRef);
 
-    const old =
-      oldCode
-        ? String(oldCode)
-            .trim()
-            .toUpperCase()
-        : null;
-
-
-    // =================================================
-    // 🚫 CODE DUPLICATE CHECK
-    // =================================================
-
-    if (
-      old !== newCode
-    ) {
-
-      const existingSnapshot =
-        await new Promise(
-          resolve => {
-
-            const studentRef =
-              ref(
-                db,
-                `students/${newCode}`
-              );
-
-            const unsubscribe =
-              onValue(
-                studentRef,
-                snapshot => {
-
-                  unsubscribe();
-                  resolve(snapshot);
-
-                },
-                error => {
-
-                  console.error(
-                    "Duplicate check error:",
-                    error
-                  );
-
-                  unsubscribe();
-                  resolve(null);
-                },
-                {
-                  onlyOnce: true
-                }
-              );
-          }
-        );
-
-
-      if (
-        existingSnapshot &&
-        existingSnapshot.exists()
-      ) {
-
-        alert(
-          "❌ यह Student Code पहले से मौजूद है।"
-        );
-
+      if (existingSnapshot && existingSnapshot.exists()) {
+        alert("❌ यह Student Code पहले से मौजूद है।");
         return false;
       }
     }
 
-
     // =================================================
-    // 💾 SAVE USER
+    // 💾 SAVE USER TO FIREBASE
     // =================================================
-
     const userData = {
-
-      code:
-        newCode,
-
-      name:
-        name,
-
-      password:
-        password,
-
-      isAdmin:
-        Boolean(
-          student.isAdmin
-        ),
-
-      updatedAt:
-        Date.now()
+      code: newCode,
+      name: name,
+      password: password,
+      isAdmin: Boolean(student.isAdmin),
+      updatedAt: Date.now()
     };
 
+    await set(ref(db, `students/${newCode}`), userData);
 
-    await set(
-      ref(
-        db,
-        `students/${newCode}`
-      ),
-      userData
-    );
-
-
-    // =================================================
-    // 🗑️ OLD CODE DELETE
-    // =================================================
-
-    if (
-      old &&
-      old !== newCode
-    ) {
-
-      await remove(
-        ref(
-          db,
-          `students/${old}`
-        )
-      );
-
-      console.log(
-        `🗑️ Old Student Code deleted: ${old}`
-      );
+    // Delete old code if updated
+    if (old && old !== newCode) {
+      await remove(ref(db, `students/${old}`));
+      console.log(`🗑️ Old Student Code deleted: ${old}`);
     }
 
-
-    console.log(
-      "✅ Student saved:",
-      userData
-    );
-
-
+    console.log("✅ Student saved to Firebase:", userData);
     return true;
 
   } catch (error) {
-
-    console.error(
-      "❌ Student Save Error:",
-      error
-    );
-
-    alert(
-      "❌ Student ID Firebase में save नहीं हो पाई।"
-    );
-
+    console.error("❌ Student Save Error:", error);
+    alert("❌ Student ID Firebase में save नहीं हो पाई।");
     return false;
+  } finally {
+    isSavingStudent = false;
   }
 }
 
@@ -324,53 +161,21 @@ async function saveStudentToFirebase(
 // 🗑️ DELETE STUDENT
 // =====================================================
 
-async function deleteStudentFromFirebase(
-  code
-) {
-
+async function deleteStudentFromFirebase(code) {
   try {
-
-    const studentCode =
-      String(
-        code || ""
-      )
-        .trim()
-        .toUpperCase();
-
+    const studentCode = String(code || "").trim().toUpperCase();
 
     if (!studentCode) {
-
       return false;
     }
 
-
-    await remove(
-      ref(
-        db,
-        `students/${studentCode}`
-      )
-    );
-
-
-    console.log(
-      "✅ Student deleted:",
-      studentCode
-    );
-
-
+    await remove(ref(db, `students/${studentCode}`));
+    console.log("✅ Student deleted:", studentCode);
     return true;
 
   } catch (error) {
-
-    console.error(
-      "❌ Student Delete Error:",
-      error
-    );
-
-    alert(
-      "❌ Student ID delete नहीं हुई।"
-    );
-
+    console.error("❌ Student Delete Error:", error);
+    alert("❌ Student ID delete नहीं हुई।");
     return false;
   }
 }
@@ -380,53 +185,20 @@ async function deleteStudentFromFirebase(
 // 💾 SAVE QUIZ
 // =====================================================
 
-async function saveQuizToFirebase(
-  quiz
-) {
-
+async function saveQuizToFirebase(quiz) {
   try {
-
-    if (
-      !quiz ||
-      !quiz.id
-    ) {
-
-      alert(
-        "❌ Quiz ID missing है।"
-      );
-
+    if (!quiz || !quiz.id) {
+      alert("❌ Quiz ID missing है।");
       return false;
     }
 
-
-    await set(
-      ref(
-        db,
-        `quizzes/${quiz.id}`
-      ),
-      quiz
-    );
-
-
-    console.log(
-      "✅ Quiz saved:",
-      quiz
-    );
-
-
+    await set(ref(db, `quizzes/${quiz.id}`), quiz);
+    console.log("✅ Quiz saved:", quiz);
     return true;
 
   } catch (error) {
-
-    console.error(
-      "❌ Quiz Save Error:",
-      error
-    );
-
-    alert(
-      "❌ Quiz save नहीं हो पाया।"
-    );
-
+    console.error("❌ Quiz Save Error:", error);
+    alert("❌ Quiz save नहीं हो पाया।");
     return false;
   }
 }
@@ -436,53 +208,21 @@ async function saveQuizToFirebase(
 // 🗑️ DELETE QUIZ
 // =====================================================
 
-async function deleteQuizFromFirebase(
-  quizId
-) {
-
+async function deleteQuizFromFirebase(quizId) {
   try {
-
     if (!quizId) {
-
       return false;
     }
 
+    await remove(ref(db, `quizzes/${quizId}`));
+    await remove(ref(db, `results/${quizId}`));
 
-    await remove(
-      ref(
-        db,
-        `quizzes/${quizId}`
-      )
-    );
-
-
-    // Quiz के सारे results भी delete
-    await remove(
-      ref(
-        db,
-        `results/${quizId}`
-      )
-    );
-
-
-    console.log(
-      "✅ Quiz और results delete हो गए।"
-    );
-
-
+    console.log("✅ Quiz और results delete हो गए।");
     return true;
 
   } catch (error) {
-
-    console.error(
-      "❌ Quiz Delete Error:",
-      error
-    );
-
-    alert(
-      "❌ Quiz delete नहीं हो पाया।"
-    );
-
+    console.error("❌ Quiz Delete Error:", error);
+    alert("❌ Quiz delete नहीं हो पाया।");
     return false;
   }
 }
@@ -492,366 +232,142 @@ async function deleteQuizFromFirebase(
 // 💾 SAVE RESULT
 // =====================================================
 
-async function saveResultToFirebase(
-  result
-) {
-
+async function saveResultToFirebase(result) {
   try {
-
-    if (!result) {
-
+    if (!result || !result.code || !result.quizId) {
       return false;
     }
 
-
-    if (
-      !result.code ||
-      !result.quizId
-    ) {
-
-      return false;
-    }
-
-
-    const code =
-      String(
-        result.code
-      )
-        .trim()
-        .toUpperCase();
-
+    const code = String(result.code).trim().toUpperCase();
 
     await set(
-      ref(
-        db,
-        `results/${result.quizId}/${code}`
-      ),
+      ref(db, `results/${result.quizId}/${code}`),
       {
-
-        code:
-          code,
-
-        name:
-          String(
-            result.name || "Unknown"
-          ),
-
-        score:
-          Number(
-            result.score
-          ) || 0,
-
-        totalQuestions:
-          Number(
-            result.totalQuestions
-          ) || 0,
-
-        date:
-          Number(
-            result.date
-          ) || Date.now(),
-
-        quizId:
-          String(
-            result.quizId
-          )
+        code: code,
+        name: String(result.name || "Unknown"),
+        score: Number(result.score) || 0,
+        totalQuestions: Number(result.totalQuestions) || 0,
+        date: Number(result.date) || Date.now(),
+        quizId: String(result.quizId)
       }
     );
 
-
-    console.log(
-      "✅ Result saved."
-    );
-
-
+    console.log("✅ Result saved.");
     return true;
 
   } catch (error) {
-
-    console.error(
-      "❌ Result Save Error:",
-      error
-    );
-
+    console.error("❌ Result Save Error:", error);
     return false;
   }
 }
 
 
 // =====================================================
-// 🏆 LIVE RESULTS
+// 🏆 LIVE RESULTS LISTENER
 // =====================================================
 
-let stopResultsListener =
-  null;
+let stopResultsListener = null;
 
 
 // =====================================================
 // 🏆 RANKING HELPER
 // =====================================================
 
-function getRankHTML(
-  result,
-  rank
-) {
-
-  const name =
-    escapeHTML(
-      result.name || "Unknown"
-    );
-
-  const scoreText =
-    `${Number(result.score || 0)}/${Number(result.totalQuestions || 0)}`;
-
-
-  // ===================================================
-  // 🥇 1ST
-  // ===================================================
+function getRankHTML(result, rank) {
+  const name = escapeHTML(result.name || "Unknown");
+  const scoreText = `${Number(result.score || 0)}/${Number(result.totalQuestions || 0)}`;
 
   if (rank === 1) {
-
     return `
       <div class="result-row result-first">
-
-        <div class="rank-number">
-          🥇
-        </div>
-
+        <div class="rank-number">🥇</div>
         <div class="rank-info">
-
-          <strong>
-            ${name}
-          </strong>
-
-          <small>
-            🏆 1st Place
-          </small>
-
+          <strong>${name}</strong>
+          <small>🏆 1st Place</small>
         </div>
-
-        <div class="rank-score">
-          ${scoreText}
-        </div>
-
+        <div class="rank-score">${scoreText}</div>
       </div>
     `;
   }
-
-
-  // ===================================================
-  // 🥈 2ND
-  // ===================================================
 
   if (rank === 2) {
-
     return `
       <div class="result-row result-second">
-
-        <div class="rank-number">
-          🥈
-        </div>
-
+        <div class="rank-number">🥈</div>
         <div class="rank-info">
-
-          <strong>
-            ${name}
-          </strong>
-
-          <small>
-            🏆 2nd Place
-          </small>
-
+          <strong>${name}</strong>
+          <small>🏆 2nd Place</small>
         </div>
-
-        <div class="rank-score">
-          ${scoreText}
-        </div>
-
+        <div class="rank-score">${scoreText}</div>
       </div>
     `;
   }
-
-
-  // ===================================================
-  // 🥉 3RD
-  // ===================================================
 
   if (rank === 3) {
-
     return `
       <div class="result-row result-third">
-
-        <div class="rank-number">
-          🥉
-        </div>
-
+        <div class="rank-number">🥉</div>
         <div class="rank-info">
-
-          <strong>
-            ${name}
-          </strong>
-
-          <small>
-            🏆 3rd Place
-          </small>
-
+          <strong>${name}</strong>
+          <small>🏆 3rd Place</small>
         </div>
-
-        <div class="rank-score">
-          ${scoreText}
-        </div>
-
+        <div class="rank-score">${scoreText}</div>
       </div>
     `;
   }
-
-
-  // ===================================================
-  // NORMAL RANK
-  // ===================================================
 
   return `
     <div class="result-row">
-
-      <div class="rank-number">
-        ${rank}.
-      </div>
-
+      <div class="rank-number">${rank}.</div>
       <div class="rank-info">
-
-        <strong>
-          ${name}
-        </strong>
-
+        <strong>${name}</strong>
       </div>
-
-      <div class="rank-score">
-        ${scoreText}
-      </div>
-
+      <div class="rank-score">${scoreText}</div>
     </div>
   `;
 }
 
 
 // =====================================================
-// 🏆 PODIUM
+// 🏆 PODIUM HTML
 // =====================================================
 
-function getPodiumHTML(
-  results
-) {
+function getPodiumHTML(results) {
+  if (!results || results.length === 0) return "";
 
-  if (
-    results.length === 0
-  ) {
-
-    return "";
-  }
-
-
-  const first =
-    results[0] || null;
-
-  const second =
-    results[1] || null;
-
-  const third =
-    results[2] || null;
-
+  const first = results[0] || null;
+  const second = results[1] || null;
+  const third = results[2] || null;
 
   return `
-
     <div class="quiz-podium">
+      ${second ? `
+        <div class="podium-item podium-second">
+          <div class="podium-trophy">🥈</div>
+          <div class="podium-name">${escapeHTML(second.name || "Unknown")}</div>
+          <div class="podium-score">${Number(second.score || 0)}/${Number(second.totalQuestions || 0)}</div>
+          <div class="podium-block">2</div>
+        </div>
+      ` : ""}
 
-      ${
-        second
-          ? `
-            <div class="podium-item podium-second">
+      ${first ? `
+        <div class="podium-item podium-first">
+          <div class="podium-trophy">🏆</div>
+          <div class="podium-name">${escapeHTML(first.name || "Unknown")}</div>
+          <div class="podium-score">${Number(first.score || 0)}/${Number(first.totalQuestions || 0)}</div>
+          <div class="podium-block">1</div>
+        </div>
+      ` : ""}
 
-              <div class="podium-trophy">
-                🥈
-              </div>
-
-              <div class="podium-name">
-                ${escapeHTML(
-                  second.name || "Unknown"
-                )}
-              </div>
-
-              <div class="podium-score">
-                ${Number(second.score || 0)}/${Number(second.totalQuestions || 0)}
-              </div>
-
-              <div class="podium-block">
-                2
-              </div>
-
-            </div>
-          `
-          : ""
-      }
-
-
-      ${
-        first
-          ? `
-            <div class="podium-item podium-first">
-
-              <div class="podium-trophy">
-                🏆
-              </div>
-
-              <div class="podium-name">
-                ${escapeHTML(
-                  first.name || "Unknown"
-                )}
-              </div>
-
-              <div class="podium-score">
-                ${Number(first.score || 0)}/${Number(first.totalQuestions || 0)}
-              </div>
-
-              <div class="podium-block">
-                1
-              </div>
-
-            </div>
-          `
-          : ""
-      }
-
-
-      ${
-        third
-          ? `
-            <div class="podium-item podium-third">
-
-              <div class="podium-trophy">
-                🥉
-              </div>
-
-              <div class="podium-name">
-                ${escapeHTML(
-                  third.name || "Unknown"
-                )}
-              </div>
-
-              <div class="podium-score">
-                ${Number(third.score || 0)}/${Number(third.totalQuestions || 0)}
-              </div>
-
-              <div class="podium-block">
-                3
-              </div>
-
-            </div>
-          `
-          : ""
-      }
-
+      ${third ? `
+        <div class="podium-item podium-third">
+          <div class="podium-trophy">🥉</div>
+          <div class="podium-name">${escapeHTML(third.name || "Unknown")}</div>
+          <div class="podium-score">${Number(third.score || 0)}/${Number(third.totalQuestions || 0)}</div>
+          <div class="podium-block">3</div>
+        </div>
+      ` : ""}
     </div>
-
   `;
 }
 
@@ -860,236 +376,71 @@ function getPodiumHTML(
 // 🏆 SHOW LIVE RESULTS
 // =====================================================
 
-function showLiveResults(
-  quizId
-) {
+function showLiveResults(quizId) {
+  const resultsDiv = document.getElementById("results");
+  const memberCount = document.getElementById("memberCount");
 
-  const resultsDiv =
-    document.getElementById(
-      "results"
-    );
+  if (!resultsDiv) return;
 
-
-  const memberCount =
-    document.getElementById(
-      "memberCount"
-    );
-
-
-  if (!resultsDiv) {
-
-    return;
-  }
-
-
-  // ===================================================
-  // पुराना listener बंद
-  // ===================================================
-
-  if (
-    stopResultsListener
-  ) {
-
+  if (stopResultsListener) {
     stopResultsListener();
-
-    stopResultsListener =
-      null;
+    stopResultsListener = null;
   }
-
 
   if (!quizId) {
-
     resultsDiv.innerHTML = `
-
-      <h3>
-        🏆 Live Quiz Results
-      </h3>
-
-      <p>
-        Quiz select करें।
-      </p>
-
+      <h3>🏆 Live Quiz Results</h3>
+      <p>Quiz select करें।</p>
     `;
-
-
-    if (memberCount) {
-
-      memberCount.innerText =
-        "Live Members: 0";
-    }
-
-
+    if (memberCount) memberCount.innerText = "Live Members: 0";
     return;
   }
 
+  const resultsRef = ref(db, `results/${quizId}`);
 
-  const resultsRef =
-    ref(
-      db,
-      `results/${quizId}`
-    );
+  stopResultsListener = onValue(
+    resultsRef,
+    snapshot => {
+      const data = snapshot.val() || {};
+      const results = Object.values(data);
 
+      results.sort((a, b) => {
+        const scoreA = Number(a.score || 0);
+        const scoreB = Number(b.score || 0);
 
-  stopResultsListener =
-    onValue(
-      resultsRef,
+        if (scoreB !== scoreA) {
+          return scoreB - scoreA;
+        }
 
-      snapshot => {
+        return Number(a.date || 0) - Number(b.date || 0);
+      });
 
-        const data =
-          snapshot.val() || {};
+      let html = `<h3>🏆 Live Quiz Results</h3>`;
 
-
-        const results =
-          Object.values(
-            data
-          );
-
-
-        // =================================================
-        // 🏆 SCORE + TIME SORT
-        // =================================================
-
-        results.sort(
-          (a, b) => {
-
-            const scoreA =
-              Number(
-                a.score || 0
-              );
-
-            const scoreB =
-              Number(
-                b.score || 0
-              );
-
-
-            if (
-              scoreB !== scoreA
-            ) {
-
-              return (
-                scoreB -
-                scoreA
-              );
-            }
-
-
-            // Same score होने पर जिसने पहले submit
-            // किया उसे ऊपर रखें
-            return (
-              Number(
-                a.date || 0
-              ) -
-              Number(
-                b.date || 0
-              )
-            );
-          }
-        );
-
-
-        let html = `
-
-          <h3>
-            🏆 Live Quiz Results
-          </h3>
-
+      if (results.length === 0) {
+        html += `
+          <div class="empty-result">
+            <p>📭 अभी कोई result नहीं आया है।</p>
+          </div>
         `;
+      } else {
+        html += getPodiumHTML(results.slice(0, 3));
+        html += `<div class="all-results"><h4>📊 Complete Ranking</h4>`;
 
+        results.forEach((r, index) => {
+          html += getRankHTML(r, index + 1);
+        });
 
-        // =================================================
-        // 📭 NO RESULTS
-        // =================================================
-
-        if (
-          results.length === 0
-        ) {
-
-          html += `
-
-            <div class="empty-result">
-
-              <p>
-                📭 अभी कोई result नहीं आया है।
-              </p>
-
-            </div>
-
-          `;
-
-        } else {
-
-          // =================================================
-          // 🏆 TOP 3 PODIUM
-          // =================================================
-
-          html +=
-            getPodiumHTML(
-              results.slice(
-                0,
-                3
-              )
-            );
-
-
-          // =================================================
-          // 📋 FULL RANKING
-          // =================================================
-
-          html += `
-
-            <div class="all-results">
-
-              <h4>
-                📊 Complete Ranking
-              </h4>
-
-          `;
-
-
-          results.forEach(
-            (
-              r,
-              index
-            ) => {
-
-              html +=
-                getRankHTML(
-                  r,
-                  index + 1
-                );
-            }
-          );
-
-
-          html += `
-            </div>
-          `;
-        }
-
-
-        resultsDiv.innerHTML =
-          html;
-
-
-        if (memberCount) {
-
-          memberCount.innerText =
-            `Live Members: ${results.length}`;
-        }
-
-      },
-
-      error => {
-
-        console.error(
-          "❌ Results Listener Error:",
-          error
-        );
-
+        html += `</div>`;
       }
-    );
+
+      resultsDiv.innerHTML = html;
+      if (memberCount) memberCount.innerText = `Live Members: ${results.length}`;
+    },
+    error => {
+      console.error("❌ Results Listener Error:", error);
+    }
+  );
 }
 
 
@@ -1097,119 +448,49 @@ function showLiveResults(
 // 🔄 RESET RESULTS
 // =====================================================
 
-async function resetAllResults(
-  quizId
-) {
-
+async function resetAllResults(quizId) {
   try {
-
     if (!quizId) {
-
-      alert(
-        "⚠️ पहले कोई Quiz select करें।"
-      );
-
+      alert("⚠️ पहले कोई Quiz select करें।");
       return false;
     }
 
-
-    await remove(
-      ref(
-        db,
-        `results/${quizId}`
-      )
-    );
-
-
-    console.log(
-      "✅ Results reset हो गए।"
-    );
-
-
+    await remove(ref(db, `results/${quizId}`));
+    console.log("✅ Results reset हो गए।");
     return true;
 
   } catch (error) {
-
-    console.error(
-      "❌ Reset Error:",
-      error
-    );
-
-    alert(
-      "❌ Results reset नहीं हो सके।"
-    );
-
+    console.error("❌ Reset Error:", error);
+    alert("❌ Results reset नहीं हो सके।");
     return false;
   }
 }
 
 
 // =====================================================
-// 🌐 GLOBAL FUNCTIONS
+// 🌐 GLOBAL EXPORTS
 // =====================================================
 
-window.listenQuizzes =
-  listenQuizzes;
-
-window.listenStudents =
-  listenStudents;
-
-window.saveStudentToFirebase =
-  saveStudentToFirebase;
-
-window.deleteStudentFromFirebase =
-  deleteStudentFromFirebase;
-
-window.saveQuizToFirebase =
-  saveQuizToFirebase;
-
-window.deleteQuizFromFirebase =
-  deleteQuizFromFirebase;
-
-window.saveResultToFirebase =
-  saveResultToFirebase;
-
-window.showLiveResults =
-  showLiveResults;
-
-window.resetAllResults =
-  resetAllResults;
+window.listenQuizzes = listenQuizzes;
+window.listenStudents = listenStudents;
+window.saveStudentToFirebase = saveStudentToFirebase;
+window.deleteStudentFromFirebase = deleteStudentFromFirebase;
+window.saveQuizToFirebase = saveQuizToFirebase;
+window.deleteQuizFromFirebase = deleteQuizFromFirebase;
+window.saveResultToFirebase = saveResultToFirebase;
+window.showLiveResults = showLiveResults;
+window.resetAllResults = resetAllResults;
 
 
 // =====================================================
 // 🛡️ ESCAPE HTML
 // =====================================================
 
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value ?? ""
-  )
-
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
