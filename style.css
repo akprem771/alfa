@@ -1,4 +1,3 @@
-
 /* =====================================================
    🌌 DYNAMIC ANIMATED AURORA BACKGROUND
 ===================================================== */
@@ -319,6 +318,51 @@ button:disabled {
 }
 
 /* =====================================================
+   🟢🔴 LIVE / FINISHED QUIZ SECTIONS (STUDENT VIEW)
+===================================================== */
+.quiz-sections-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+.quiz-group-section {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.quiz-group-title {
+  margin: 0 0 18px;
+  font-size: 21px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.quiz-group-section.live-section {
+  border-left: 6px solid #10b981;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.12);
+}
+
+.quiz-group-section.live-section .quiz-group-title {
+  color: #6ee7b7;
+}
+
+.quiz-group-section.finished-section {
+  border-left: 6px solid #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.12);
+}
+
+.quiz-group-section.finished-section .quiz-group-title {
+  color: #fca5a5;
+}
+
+/* =====================================================
    🃏 3D CARDS WITH GLOWING EDGES
 ===================================================== */
 .quiz-card,
@@ -354,8 +398,16 @@ button:disabled {
 }
 
 /* =====================================================
-   🟢 GLOWING STATUS BADGES
+   🟢 GLOWING STATUS & CLASS BADGES
 ===================================================== */
+.badge-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .status {
   padding: 7px 16px;
   border-radius: 30px;
@@ -372,6 +424,18 @@ button:disabled {
   color: #ffffff;
   box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
   animation: pulseNeon 1.8s infinite;
+}
+
+.practice {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+  animation: pulsePurple 2s infinite;
+}
+
+@keyframes pulsePurple {
+  0%, 100% { box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); transform: scale(1); }
+  50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.9); transform: scale(1.05); }
 }
 
 @keyframes pulseNeon {
@@ -391,6 +455,25 @@ button:disabled {
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+}
+
+.class-badge {
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.class-badge-locked {
+  background: linear-gradient(135deg, #64748b, #475569);
+  color: #f1f5f9;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 /* =====================================================
@@ -424,6 +507,172 @@ button:disabled {
   box-shadow: 
     0 8px 0 #b45309,
     0 16px 28px rgba(245, 158, 11, 0.5);
+}
+
+.answer-key-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 
+    0 6px 0 #047857,
+    0 12px 22px rgba(16, 185, 129, 0.35);
+}
+
+.answer-key-btn:hover {
+  box-shadow: 
+    0 8px 0 #047857,
+    0 16px 28px rgba(16, 185, 129, 0.5);
+}
+
+/* =====================================================
+   🖼️ QUESTION FIGURE / DIAGRAM STYLES
+===================================================== */
+.question-figure-box {
+  margin: 18px 0;
+  text-align: center;
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid #cbd5e1;
+}
+
+.question-figure-img {
+  max-width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.admin-figure-preview {
+  max-width: 150px;
+  max-height: 100px;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+/* =====================================================
+   🤖 AI QUIZ GENERATOR CARD
+===================================================== */
+.ai-generator-card {
+  border-left: 8px solid #8b5cf6 !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  margin-bottom: 30px;
+}
+
+.ai-generator-card h3 {
+  color: #6d28d9 !important;
+  margin: 0 0 6px !important;
+}
+
+.card-desc {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.ai-btn {
+  width: 100%;
+  margin-top: 18px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #ffffff;
+  font-size: 16px;
+  padding: 16px;
+  box-shadow: 
+    0 6px 0 #4c1d95,
+    0 14px 28px rgba(139, 92, 246, 0.4);
+}
+
+.ai-btn:hover {
+  box-shadow: 
+    0 8px 0 #4c1d95,
+    0 18px 34px rgba(139, 92, 246, 0.55);
+}
+
+.file-upload-box {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  padding: 16px;
+  border-radius: 16px;
+  margin: 14px 0;
+  text-align: center;
+}
+
+/* Multi-photo preview grid for AI Quiz Generator */
+.ai-multi-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.ai-image-thumb-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+}
+
+.image-preview-thumb {
+  max-width: 180px;
+  max-height: 120px;
+  width: 100%;
+  object-fit: contain;
+  margin: 0 auto 8px;
+  display: block;
+  border-radius: 10px;
+  border: 1px solid #94a3b8;
+}
+
+.btn-sm-danger {
+  background: #ef4444;
+  color: white;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 10px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.ai-status {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.ai-status.loading {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.ai-status.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.ai-status.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* =====================================================
+   ♾️ PRACTICE MODE NOTE (No Date/Time required)
+===================================================== */
+.practice-note {
+  background: #ede9fe;
+  border: 1px solid #c4b5fd;
+  color: #5b21b6;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
+  margin: 4px 0 10px;
 }
 
 /* =====================================================
@@ -568,6 +817,28 @@ button:disabled {
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
+.results-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.results-header-flex h3 {
+  margin: 0;
+}
+
+.class-filter-box select {
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 2px solid #cbd5e1;
+  font-weight: 700;
+  outline: none;
+  font-family: inherit;
+}
+
 .results-box h3 {
   margin-top: 0;
   font-size: 24px;
@@ -674,7 +945,7 @@ button:disabled {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
 }
 
@@ -814,6 +1085,7 @@ button:disabled {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
+  padding: 18px;
 }
 
 .saved-quiz h4 {
@@ -860,89 +1132,153 @@ button:disabled {
 }
 
 /* =====================================================
-   ⏳ 3D COUNTDOWN BOX
+   📑 ANSWER KEY MODAL STYLES
 ===================================================== */
-.countdown-box {
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(25px);
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-card {
+  background: #ffffff;
   color: #0f172a;
-  padding: 35px;
-  border-radius: 28px;
-  text-align: center;
-  margin: 30px auto;
-  max-width: 620px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-  transform: rotateX(4deg);
-}
-
-.countdown-box h2 {
-  margin-top: 0;
-  font-size: 26px;
-  font-weight: 800;
-}
-
-.countdown {
-  font-size: 48px;
-  font-weight: 900;
-  background: linear-gradient(135deg, #2563eb, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 15px 0;
-  filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.3));
-}
-
-/* =====================================================
-   📊 3D NEON PROGRESS BAR
-===================================================== */
-.progress-container {
   width: 100%;
-  height: 14px;
-  background: #e2e8f0;
-  border-radius: 30px;
-  overflow: hidden;
-  margin: 20px 0;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 28px;
+  padding: 28px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #6366f1, #3b82f6, #ec4899);
-  border-radius: 30px;
-  box-shadow: 0 0 16px rgba(99, 102, 241, 0.8);
-  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* =====================================================
-   ⚠️ 3D NOTIFICATION ALERTS
-===================================================== */
-.message,
-.alert-box {
-  padding: 16px 20px;
-  border-radius: 18px;
-  margin: 16px 0;
-  text-align: center;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 22px;
   font-weight: 800;
-  font-size: 15px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  color: #1e1b4b;
 }
 
-.error {
-  background: linear-gradient(135deg, #fee2e2, #fecaca);
-  color: #991b1b;
-  border: 2px solid #fca5a5;
+.close-modal-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.success {
-  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-  color: #166534;
-  border: 2px solid #86efac;
+.close-modal-btn:hover {
+  background: #ef4444;
+  color: white;
 }
 
-.warning {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
+.answer-key-info {
+  background: linear-gradient(135deg, #e0e7ff, #e0f2fe);
+  border: 2px solid #c7d2fe;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.answer-key-info h3 {
+  margin: 0 0 8px;
+  color: #3730a3;
+  font-size: 20px;
+}
+
+.score-badge-big {
+  display: inline-block;
+  background: #4f46e5;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 800;
+  margin-top: 6px;
+}
+
+.ak-question-card {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.ak-question-card h4 {
+  margin: 0 0 12px;
+  font-size: 17px;
+  color: #0f172a;
+}
+
+.ak-option {
+  padding: 12px 16px;
+  margin: 8px 0;
+  border-radius: 14px;
+  font-weight: 700;
+  border: 2px solid #e2e8f0;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ak-option.correct {
+  background: #dcfce7 !important;
+  border-color: #22c55e !important;
+  color: #15803d !important;
+}
+
+.ak-option.wrong-selected {
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #b91c1c !important;
+}
+
+.explanation-box {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
   color: #92400e;
-  border: 2px solid #fcd34d;
+  padding: 12px 16px;
+  border-radius: 14px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modal-footer {
+  text-align: right;
+  margin-top: 20px;
+  border-top: 2px solid #e2e8f0;
+  padding-top: 14px;
 }
 
 /* =====================================================
@@ -996,28 +1332,4 @@ button:disabled {
     flex-direction: column;
     gap: 6px;
   }
-
-  .countdown {
-    font-size: 36px;
-  }
 }
-
-@media (max-width: 380px) {
-  body {
-    padding: 8px;
-  }
-
-  .quiz-card,
-  .admin-card,
-  .saved-quiz,
-  .question-card,
-  .results-box {
-    padding: 18px;
-  }
-
-  button {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
-}
-```

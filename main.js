@@ -21,15 +21,16 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyChziW0Rvl35FHfwhds9TaU2vn44-JzQV0",
-  authDomain: "allinone-a7123.firebaseapp.com",
-  databaseURL: "https://allinone-a7123-default-rtdb.firebaseio.com",
-  projectId: "allinone-a7123",
-  storageBucket: "allinone-a7123.firebasestorage.app",
-  messagingSenderId: "615348054695",
-  appId: "1:615348054695:web:d3324a6ea5a846043cc982",
-  measurementId: "G-80SSN9RTL1"
+  apiKey: "AIzaSyCYWLPEtOPPdKpzMdp3wk9E92_FCaypqjk",
+  authDomain: "alphaquiz-89594.firebaseapp.com",
+  databaseURL: "https://alphaquiz-89594-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "alphaquiz-89594",
+  storageBucket: "alphaquiz-89594.firebasestorage.app",
+  messagingSenderId: "332118754128",
+  appId: "1:332118754128:web:8a43a89a6cdbe64b32e255",
+  measurementId: "G-T8KECF1V3R"
 };
+
 
 // =====================================================
 // 🚀 INITIALIZE FIREBASE
@@ -37,6 +38,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+
 
 
 // =====================================================
@@ -82,7 +85,7 @@ function listenStudents(callback) {
 
 
 // =====================================================
-// ➕ CREATE / UPDATE STUDENT (FIXED DOUBLE-SAVE LOCK)
+// ➕ CREATE / UPDATE STUDENT (WITH CLASS PROPERTY)
 // =====================================================
 
 let isSavingStudent = false;
@@ -104,6 +107,7 @@ async function saveStudentToFirebase(student, oldCode = null) {
     const newCode = String(student.code || "").trim().toUpperCase();
     const name = String(student.name || "").trim();
     const password = String(student.password || "").trim();
+    const userClass = String(student.userClass || "Class 6th").trim();
 
     if (!newCode || !name || !password) {
       alert("❌ Name, Code और Password जरूरी हैं।");
@@ -112,9 +116,6 @@ async function saveStudentToFirebase(student, oldCode = null) {
 
     const old = oldCode ? String(oldCode).trim().toUpperCase() : null;
 
-    // =================================================
-    // 🔍 DUPLICATE CODE CHECK USING OFFICIAL `get()`
-    // =================================================
     if (old !== newCode) {
       const studentRef = ref(db, `students/${newCode}`);
       const existingSnapshot = await get(studentRef);
@@ -125,20 +126,17 @@ async function saveStudentToFirebase(student, oldCode = null) {
       }
     }
 
-    // =================================================
-    // 💾 SAVE USER TO FIREBASE
-    // =================================================
     const userData = {
       code: newCode,
       name: name,
       password: password,
+      userClass: userClass,
       isAdmin: Boolean(student.isAdmin),
       updatedAt: Date.now()
     };
 
     await set(ref(db, `students/${newCode}`), userData);
 
-    // Delete old code if updated
     if (old && old !== newCode) {
       await remove(ref(db, `students/${old}`));
       console.log(`🗑️ Old Student Code deleted: ${old}`);
@@ -149,7 +147,14 @@ async function saveStudentToFirebase(student, oldCode = null) {
 
   } catch (error) {
     console.error("❌ Student Save Error:", error);
-    alert("❌ Student ID Firebase में save नहीं हो पाई।");
+    const reason = (error && error.message) ? error.message : "Unknown error";
+    const isPermission = /permission/i.test(reason);
+    alert(
+      `❌ Student ID Firebase में save नहीं हो पाई।\n\nकारण: ${reason}` +
+      (isPermission
+        ? `\n\n👉 यह Firebase Realtime Database की Security Rules की वजह से हो सकता है। Firebase Console > Realtime Database > Rules में जाकर Read/Write Permission allow करें।`
+        : "")
+    );
     return false;
   } finally {
     isSavingStudent = false;
@@ -175,14 +180,15 @@ async function deleteStudentFromFirebase(code) {
 
   } catch (error) {
     console.error("❌ Student Delete Error:", error);
-    alert("❌ Student ID delete नहीं हुई।");
+    const reason = (error && error.message) ? error.message : "Unknown error";
+    alert(`❌ Student ID delete नहीं हुई।\n\nकारण: ${reason}`);
     return false;
   }
 }
 
 
 // =====================================================
-// 💾 SAVE QUIZ
+// 💾 SAVE QUIZ (WITH TARGET CLASS & PRACTICE MODE)
 // =====================================================
 
 async function saveQuizToFirebase(quiz) {
@@ -198,7 +204,8 @@ async function saveQuizToFirebase(quiz) {
 
   } catch (error) {
     console.error("❌ Quiz Save Error:", error);
-    alert("❌ Quiz save नहीं हो पाया।");
+    const reason = (error && error.message) ? error.message : "Unknown error";
+    alert(`❌ Quiz save नहीं हो पाया।\n\nकारण: ${reason}`);
     return false;
   }
 }
@@ -222,14 +229,15 @@ async function deleteQuizFromFirebase(quizId) {
 
   } catch (error) {
     console.error("❌ Quiz Delete Error:", error);
-    alert("❌ Quiz delete नहीं हो पाया।");
+    const reason = (error && error.message) ? error.message : "Unknown error";
+    alert(`❌ Quiz delete नहीं हो पाया।\n\nकारण: ${reason}`);
     return false;
   }
 }
 
 
 // =====================================================
-// 💾 SAVE RESULT
+// 💾 SAVE RESULT (WITH RESPONSES FOR ANSWER KEY)
 // =====================================================
 
 async function saveResultToFirebase(result) {
@@ -245,10 +253,12 @@ async function saveResultToFirebase(result) {
       {
         code: code,
         name: String(result.name || "Unknown"),
+        userClass: String(result.userClass || "Class 6th"),
         score: Number(result.score) || 0,
         totalQuestions: Number(result.totalQuestions) || 0,
         date: Number(result.date) || Date.now(),
-        quizId: String(result.quizId)
+        quizId: String(result.quizId),
+        responses: Array.isArray(result.responses) ? result.responses : []
       }
     );
 
@@ -256,7 +266,7 @@ async function saveResultToFirebase(result) {
     return true;
 
   } catch (error) {
-    console.error("❌ Result Save Error:", error);
+    console.error("❌ Result Save Error:", error, error && error.message);
     return false;
   }
 }
@@ -275,6 +285,7 @@ let stopResultsListener = null;
 
 function getRankHTML(result, rank) {
   const name = escapeHTML(result.name || "Unknown");
+  const studentClass = escapeHTML(result.userClass || "Class 6th");
   const scoreText = `${Number(result.score || 0)}/${Number(result.totalQuestions || 0)}`;
 
   if (rank === 1) {
@@ -282,7 +293,7 @@ function getRankHTML(result, rank) {
       <div class="result-row result-first">
         <div class="rank-number">🥇</div>
         <div class="rank-info">
-          <strong>${name}</strong>
+          <strong>${name} (${studentClass})</strong>
           <small>🏆 1st Place</small>
         </div>
         <div class="rank-score">${scoreText}</div>
@@ -295,7 +306,7 @@ function getRankHTML(result, rank) {
       <div class="result-row result-second">
         <div class="rank-number">🥈</div>
         <div class="rank-info">
-          <strong>${name}</strong>
+          <strong>${name} (${studentClass})</strong>
           <small>🏆 2nd Place</small>
         </div>
         <div class="rank-score">${scoreText}</div>
@@ -308,7 +319,7 @@ function getRankHTML(result, rank) {
       <div class="result-row result-third">
         <div class="rank-number">🥉</div>
         <div class="rank-info">
-          <strong>${name}</strong>
+          <strong>${name} (${studentClass})</strong>
           <small>🏆 3rd Place</small>
         </div>
         <div class="rank-score">${scoreText}</div>
@@ -320,7 +331,7 @@ function getRankHTML(result, rank) {
     <div class="result-row">
       <div class="rank-number">${rank}.</div>
       <div class="rank-info">
-        <strong>${name}</strong>
+        <strong>${name} (${studentClass})</strong>
       </div>
       <div class="rank-score">${scoreText}</div>
     </div>
@@ -373,12 +384,13 @@ function getPodiumHTML(results) {
 
 
 // =====================================================
-// 🏆 SHOW LIVE RESULTS
+// 🏆 SHOW LIVE RESULTS (WITH CLASS FILTER SUPPORT)
 // =====================================================
 
 function showLiveResults(quizId) {
   const resultsDiv = document.getElementById("results");
   const memberCount = document.getElementById("memberCount");
+  const classFilterSelect = document.getElementById("resultClassFilter");
 
   if (!resultsDiv) return;
 
@@ -402,7 +414,12 @@ function showLiveResults(quizId) {
     resultsRef,
     snapshot => {
       const data = snapshot.val() || {};
-      const results = Object.values(data);
+      let results = Object.values(data);
+
+      const filterVal = classFilterSelect ? classFilterSelect.value : "ALL";
+      if (filterVal !== "ALL") {
+        results = results.filter(r => (r.userClass || "Class 6th") === filterVal);
+      }
 
       results.sort((a, b) => {
         const scoreA = Number(a.score || 0);
@@ -415,7 +432,21 @@ function showLiveResults(quizId) {
         return Number(a.date || 0) - Number(b.date || 0);
       });
 
-      let html = `<h3>🏆 Live Quiz Results</h3>`;
+      let html = `
+        <div class="results-header-flex">
+          <h3>🏆 Live Quiz Results</h3>
+          <div class="class-filter-box">
+            <label for="resultClassFilter">🏫 Filter Class:</label>
+            <select id="resultClassFilter">
+              <option value="ALL" ${filterVal === 'ALL' ? 'selected' : ''}>All Classes</option>
+              <option value="Class 5th" ${filterVal === 'Class 5th' ? 'selected' : ''}>Class 5th</option>
+              <option value="Class 6th" ${filterVal === 'Class 6th' ? 'selected' : ''}>Class 6th</option>
+              <option value="Class 7th" ${filterVal === 'Class 7th' ? 'selected' : ''}>Class 7th</option>
+              <option value="Class 8th" ${filterVal === 'Class 8th' ? 'selected' : ''}>Class 8th</option>
+            </select>
+          </div>
+        </div>
+      `;
 
       if (results.length === 0) {
         html += `
@@ -425,7 +456,7 @@ function showLiveResults(quizId) {
         `;
       } else {
         html += getPodiumHTML(results.slice(0, 3));
-        html += `<div class="all-results"><h4>📊 Complete Ranking</h4>`;
+        html += `<div class="all-results"><h4>📊 Complete Ranking (${filterVal})</h4>`;
 
         results.forEach((r, index) => {
           html += getRankHTML(r, index + 1);
@@ -436,6 +467,11 @@ function showLiveResults(quizId) {
 
       resultsDiv.innerHTML = html;
       if (memberCount) memberCount.innerText = `Live Members: ${results.length}`;
+
+      const newFilterSelect = document.getElementById("resultClassFilter");
+      if (newFilterSelect) {
+        newFilterSelect.onchange = () => showLiveResults(quizId);
+      }
     },
     error => {
       console.error("❌ Results Listener Error:", error);
@@ -461,8 +497,240 @@ async function resetAllResults(quizId) {
 
   } catch (error) {
     console.error("❌ Reset Error:", error);
-    alert("❌ Results reset नहीं हो सके।");
+    const reason = (error && error.message) ? error.message : "Unknown error";
+    alert(`❌ Results reset नहीं हो सके।\n\nकारण: ${reason}`);
     return false;
+  }
+}
+
+
+// =====================================================
+// 🤖 GEMINI AI QUIZ GENERATOR ENGINE (MULTI-PHOTO, NO LIMIT)
+// =====================================================
+
+// uploadedAiImages holds ALL selected photos — no count/size cap is
+// enforced by this code, so as many photos as the user selects (and the
+// browser / Gemini API can handle) will be sent together.
+let uploadedAiImages = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  const apiKeyInput = document.getElementById("aiApiKey");
+  if (apiKeyInput) {
+    const savedKey = localStorage.getItem("gemini_api_key");
+    if (savedKey) apiKeyInput.value = savedKey;
+    apiKeyInput.onchange = () => {
+      localStorage.setItem("gemini_api_key", apiKeyInput.value.trim());
+    };
+  }
+
+  const fileInput = document.getElementById("aiImageInput");
+
+  if (fileInput) {
+    fileInput.onchange = (e) => {
+      const files = Array.from(e.target.files || []);
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          uploadedAiImages.push({
+            mimeType: file.type || "image/jpeg",
+            base64: evt.target.result.split(",")[1],
+            name: file.name || "photo"
+          });
+          renderAiImagePreviews();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Allow re-selecting the same file(s) again later
+      fileInput.value = "";
+    };
+  }
+
+  const generateBtn = document.getElementById("generateAiQuizBtn");
+  if (generateBtn) {
+    generateBtn.onclick = handleGenerateAiQuiz;
+  }
+});
+
+function renderAiImagePreviews() {
+  const previewContainer = document.getElementById("aiImagePreviewContainer");
+  if (!previewContainer) return;
+
+  if (uploadedAiImages.length === 0) {
+    previewContainer.classList.add("hidden");
+    previewContainer.innerHTML = "";
+    return;
+  }
+
+  previewContainer.classList.remove("hidden");
+  previewContainer.innerHTML = "";
+
+  uploadedAiImages.forEach((img, index) => {
+    const wrap = document.createElement("div");
+    wrap.className = "ai-image-thumb-wrap";
+    wrap.innerHTML = `
+      <img src="data:${img.mimeType};base64,${img.base64}" class="image-preview-thumb" alt="${escapeHTML(img.name)}" />
+      <button type="button" class="btn-sm-danger ai-remove-image-btn" data-index="${index}">❌ Remove</button>
+    `;
+    previewContainer.appendChild(wrap);
+  });
+
+  previewContainer.querySelectorAll(".ai-remove-image-btn").forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.index, 10);
+      uploadedAiImages.splice(idx, 1);
+      renderAiImagePreviews();
+    };
+  });
+}
+
+async function handleGenerateAiQuiz() {
+  const apiKeyInput = document.getElementById("aiApiKey");
+  const promptInput = document.getElementById("aiPromptText");
+  const targetClassSelect = document.getElementById("aiTargetClass");
+  const numQuestionsInput = document.getElementById("aiNumQuestions");
+  const statusDiv = document.getElementById("aiStatus");
+
+  const apiKey = apiKeyInput ? apiKeyInput.value.trim() : "";
+  const promptText = promptInput ? promptInput.value.trim() : "";
+  const targetClass = targetClassSelect ? targetClassSelect.value : "All Classes";
+  const numQuestions = numQuestionsInput ? parseInt(numQuestionsInput.value, 10) : 5;
+
+  if (!apiKey) {
+    alert("⚠️ कृपया Gemini API Key डालें!");
+    if (apiKeyInput) apiKeyInput.focus();
+    return;
+  }
+
+  if (!promptText && uploadedAiImages.length === 0) {
+    alert("⚠️ कृपया Prompt लिखें या कम से कम एक Photo Upload करें!");
+    return;
+  }
+
+  localStorage.setItem("gemini_api_key", apiKey);
+
+  if (statusDiv) {
+    statusDiv.className = "ai-status loading";
+    statusDiv.innerText = uploadedAiImages.length > 0
+      ? `⏳ Gemini AI से ${uploadedAiImages.length} Photo(s) के साथ Quiz Generate हो रहा है... कृपया प्रतीक्षा करें।`
+      : "⏳ Gemini AI से Quiz Generate हो रहा है... कृपया प्रतीक्षा करें।";
+    statusDiv.classList.remove("hidden");
+  }
+
+  try {
+    const contents = [];
+    let userMessageText = `Please generate a quiz for ${targetClass} with ${numQuestions} questions. `;
+    if (promptText) {
+      userMessageText += `Topic & Instructions: ${promptText}. `;
+    }
+    if (uploadedAiImages.length > 0) {
+      userMessageText += `Use ALL ${uploadedAiImages.length} attached photo(s) as source material for the questions. `;
+    }
+    userMessageText += `Respond strictly in valid JSON format matching this structure:
+{
+  "title": "Quiz Title",
+  "questions": [
+    {
+      "q": "Question text here?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "answer": 0,
+      "explanation": "Detailed explanation of correct answer"
+    }
+  ]
+}
+Return ONLY pure JSON without markdown code block ticks.`;
+
+    const parts = [{ text: userMessageText }];
+
+    // Attach every uploaded photo — no artificial limit on count here.
+    uploadedAiImages.forEach(img => {
+      parts.push({
+        inlineData: {
+          mimeType: img.mimeType,
+          data: img.base64
+        }
+      });
+    });
+
+    contents.push({ parts: parts });
+
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: contents })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${response.status} Error`);
+    }
+
+    const data = await response.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    // Clean JSON response string
+    let cleanedJson = rawText.trim();
+    if (cleanedJson.startsWith("```json")) {
+      cleanedJson = cleanedJson.replace(/^```json/, "").replace(/```$/, "").trim();
+    } else if (cleanedJson.startsWith("```")) {
+      cleanedJson = cleanedJson.replace(/^```/, "").replace(/```$/, "").trim();
+    }
+
+    const quizData = JSON.parse(cleanedJson);
+
+    if (!quizData || !Array.isArray(quizData.questions) || quizData.questions.length === 0) {
+      throw new Error("Invalid response format from AI");
+    }
+
+    // Auto populate Admin Quiz Creation Form!
+    const titleInput = document.getElementById("quizTitle");
+    const classInput = document.getElementById("quizClass");
+    const container = document.getElementById("adminQuestions");
+
+    if (titleInput) titleInput.value = quizData.title || `AI Generated Quiz (${targetClass})`;
+    if (classInput) classInput.value = targetClass;
+
+    if (container) {
+      container.innerHTML = "";
+      quizData.questions.forEach(q => {
+        if (typeof window.addQuestion === "function") {
+          window.addQuestion();
+          const card = container.lastElementChild;
+          if (card) {
+            const qInput = card.querySelector(".question-text");
+            if (qInput) qInput.value = q.q || "";
+
+            const optInputs = card.querySelectorAll(".option-input");
+            if (Array.isArray(q.options)) {
+              q.options.forEach((opt, idx) => {
+                if (optInputs[idx]) optInputs[idx].value = opt;
+              });
+            }
+
+            const correctSelect = card.querySelector(".correct-answer");
+            if (correctSelect) correctSelect.value = Number.isInteger(q.answer) ? q.answer : 0;
+
+            const expText = card.querySelector(".question-explanation");
+            if (expText) expText.value = q.explanation || "";
+          }
+        }
+      });
+    }
+
+    if (statusDiv) {
+      statusDiv.className = "ai-status success";
+      statusDiv.innerText = `✅ Successfully Generated ${quizData.questions.length} Questions! Form में भर दिया गया है। Scroll करके Save Quiz दबाएँ।`;
+    }
+
+  } catch (error) {
+    console.error("❌ Gemini AI Error:", error);
+    if (statusDiv) {
+      statusDiv.className = "ai-status error";
+      statusDiv.innerText = `❌ AI Generation Failed: ${error.message}`;
+    }
   }
 }
 

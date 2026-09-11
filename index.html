@@ -3,12 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D Quiz System</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,19 +17,19 @@
   <div id="loginBox" class="login-container">
 
     <div class="login-icon hans-sitar">
-  <span class="hans-right">🦢</span>
-</div>
+      <span class="hans-right">🦢</span>
+    </div>
 
     <h2>जय माँ सरस्वती</h2>
 
     <p class="login-subtitle">
-      class 5th to 8th
+      Class 1st to 12th
     </p>
 
     <input
       id="code"
       type="text"
-      placeholder="Student Code"
+      placeholder="Student Code (e.g. XYZ111)"
       autocomplete="off"
     >
 
@@ -83,7 +79,7 @@
 
 
     <!-- ================================================= -->
-    <!-- 👨‍🎓 STUDENT AREA -->
+    <!-- 👨🎓 STUDENT AREA -->
     <!-- ================================================= -->
 
     <div id="studentSection">
@@ -133,9 +129,30 @@
       id="results"
       class="results-box">
 
-      <h3>
-        🏆 Live Quiz Results
-      </h3>
+      <div class="results-header-flex">
+        <h3>
+          🏆 Live Quiz Results
+        </h3>
+        <!-- Filter by Class for Results (Class 1st to 12th) -->
+        <div class="class-filter-box">
+          <label for="resultClassFilter">🏫 Filter Class:</label>
+          <select id="resultClassFilter">
+            <option value="ALL">All Classes</option>
+            <option value="Class 1st">Class 1st</option>
+            <option value="Class 2nd">Class 2nd</option>
+            <option value="Class 3rd">Class 3rd</option>
+            <option value="Class 4th">Class 4th</option>
+            <option value="Class 5th">Class 5th</option>
+            <option value="Class 6th">Class 6th</option>
+            <option value="Class 7th">Class 7th</option>
+            <option value="Class 8th">Class 8th</option>
+            <option value="Class 9th">Class 9th</option>
+            <option value="Class 10th">Class 10th</option>
+            <option value="Class 11th">Class 11th</option>
+            <option value="Class 12th">Class 12th</option>
+          </select>
+        </div>
+      </div>
 
       <p>
         Quiz select करने के बाद result यहाँ दिखाई देगा।
@@ -145,12 +162,64 @@
 
 
     <!-- ================================================= -->
-    <!-- 👨‍💼 ADMIN PANEL -->
+    <!-- 👨💼 ADMIN PANEL -->
     <!-- ================================================= -->
 
     <div
       id="adminPanel"
       class="admin-panel hidden">
+
+      <!-- ================================================= -->
+      <!-- 🤖 AI QUIZ GENERATOR (GEMINI AI) -->
+      <!-- ================================================= -->
+      <div class="admin-card ai-generator-card">
+        <h3>✨ 🤖 AI Quiz Generator (Gemini AI)</h3>
+        <p class="card-desc">Topic prompt लिखकर या कई Photos upload करके तुरंत Quiz तैयार करें!</p>
+
+        <div class="form-grid">
+          <div>
+            <label>🔑 Gemini API Key</label>
+            <input id="aiApiKey" type="password" placeholder="Gemini API Key (AIzaSy...)" />
+          </div>
+          <div>
+            <label>🏫 Target Class</label>
+            <select id="aiTargetClass">
+              <option value="All Classes">All Classes</option>
+              <option value="Class 1st">Class 1st</option>
+              <option value="Class 2nd">Class 2nd</option>
+              <option value="Class 3rd">Class 3rd</option>
+              <option value="Class 4th">Class 4th</option>
+              <option value="Class 5th">Class 5th</option>
+              <option value="Class 6th">Class 6th</option>
+              <option value="Class 7th">Class 7th</option>
+              <option value="Class 8th">Class 8th</option>
+              <option value="Class 9th">Class 9th</option>
+              <option value="Class 10th">Class 10th</option>
+              <option value="Class 11th">Class 11th</option>
+              <option value="Class 12th">Class 12th</option>
+            </select>
+          </div>
+          <div>
+            <label>❓ Number of Questions</label>
+            <input id="aiNumQuestions" type="number" min="1" max="20" value="5" />
+          </div>
+        </div>
+
+        <label>📝 Topic / Instructions Prompt</label>
+        <textarea id="aiPromptText" placeholder="उदा. Class 10 Math Quadratic Equations के 5 सवाल हल व्याख्या के साथ बनाएँ..."></textarea>
+
+        <div class="file-upload-box">
+          <label>📸 Question Paper / Book की Photos (Optional, एक से ज़्यादा Photo चुन सकते हैं):</label>
+          <input id="aiImageInput" type="file" accept="image/*" multiple />
+          <div id="aiImagePreviewContainer" class="hidden ai-multi-preview"></div>
+        </div>
+
+        <button id="generateAiQuizBtn" type="button" class="ai-btn">
+          ✨ 🤖 Generate Quiz with AI
+        </button>
+
+        <div id="aiStatus" class="ai-status hidden"></div>
+      </div>
 
 
       <!-- ================================================= -->
@@ -179,63 +248,57 @@
         <div class="form-grid">
 
           <div>
-
-            <label>
-              📅 Quiz Date
-            </label>
-
-            <input
-              id="quizDate"
-              type="date"
-            >
-
+            <label>🏫 Target Class</label>
+            <select id="quizClass">
+              <option value="All Classes">All Classes</option>
+              <option value="Class 1st">Class 1st</option>
+              <option value="Class 2nd">Class 2nd</option>
+              <option value="Class 3rd">Class 3rd</option>
+              <option value="Class 4th">Class 4th</option>
+              <option value="Class 5th">Class 5th</option>
+              <option value="Class 6th">Class 6th</option>
+              <option value="Class 7th">Class 7th</option>
+              <option value="Class 8th">Class 8th</option>
+              <option value="Class 9th">Class 9th</option>
+              <option value="Class 10th">Class 10th</option>
+              <option value="Class 11th">Class 11th</option>
+              <option value="Class 12th">Class 12th</option>
+            </select>
           </div>
 
-
           <div>
-
-            <label>
-              🟢 Start Time
-            </label>
-
-            <input
-              id="quizStart"
-              type="time"
-            >
-
+            <label>⚡ Quiz Mode</label>
+            <select id="quizMode">
+              <option value="live">🟢 Scheduled Live Mode</option>
+              <option value="practice">♾️ Unlimited Practice Mode</option>
+            </select>
           </div>
 
-
-          <div>
-
-            <label>
-              🔴 End Time
-            </label>
-
-            <input
-              id="quizEnd"
-              type="time"
-            >
-
+          <div id="quizDateField">
+            <label>📅 Quiz Date</label>
+            <input id="quizDate" type="date">
           </div>
 
+          <div id="quizStartField">
+            <label>🟢 Start Time</label>
+            <input id="quizStart" type="time">
+          </div>
+
+          <div id="quizEndField">
+            <label>🔴 End Time</label>
+            <input id="quizEnd" type="time">
+          </div>
 
           <div>
-
-            <label>
-              ⏱️ Question Time
-            </label>
-
-            <input
-              id="questionTime"
-              type="number"
-              min="5"
-              value="15"
-            >
-
+            <label>⏱️ Question Time (Seconds)</label>
+            <input id="questionTime" type="number" min="5" value="15">
           </div>
 
         </div>
+
+        <p id="practiceModeNote" class="practice-note hidden">
+          ♾️ Practice Mode में Date / Start / End Time की ज़रूरत नहीं है — यह Quiz हमेशा उपलब्ध रहेगा और Student कभी भी, कितनी भी बार खेल सकते हैं।
+        </p>
 
 
         <!-- ================================================= -->
@@ -243,7 +306,7 @@
         <!-- ================================================= -->
 
         <h3 class="question-heading">
-          ❓ Questions
+          ❓ Questions & Figures
         </h3>
 
 
@@ -325,6 +388,33 @@
 
     </div>
 
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- 📑 ANSWER KEY & REVIEW MODAL -->
+  <!-- ================================================= -->
+  <div id="answerKeyModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>📑 Detailed Answer Key & Review</h2>
+        <button id="closeAnswerKeyBtn" type="button" class="close-modal-btn">✖</button>
+      </div>
+
+      <div id="answerKeyHeaderInfo" class="answer-key-info">
+        <!-- Student details & Score summary -->
+      </div>
+
+      <div id="answerKeyContent" class="answer-key-questions">
+        <!-- Questions breakdown -->
+      </div>
+
+      <div class="modal-footer">
+        <button id="closeAnswerKeyFooterBtn" type="button" class="save-btn">
+          ✅ Close Answer Key
+        </button>
+      </div>
+    </div>
   </div>
 
 
