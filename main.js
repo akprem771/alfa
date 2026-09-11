@@ -21,16 +21,15 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCYWLPEtOPPdKpzMdp3wk9E92_FCaypqjk",
-  authDomain: "alphaquiz-89594.firebaseapp.com",
-  databaseURL: "https://alphaquiz-89594-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "alphaquiz-89594",
-  storageBucket: "alphaquiz-89594.firebasestorage.app",
-  messagingSenderId: "332118754128",
-  appId: "1:332118754128:web:8a43a89a6cdbe64b32e255",
-  measurementId: "G-T8KECF1V3R"
+  apiKey: "AIzaSyChziW0Rvl35FHfwhds9TaU2vn44-JzQV0",
+  authDomain: "allinone-a7123.firebaseapp.com",
+  databaseURL: "https://allinone-a7123-default-rtdb.firebaseio.com",
+  projectId: "allinone-a7123",
+  storageBucket: "allinone-a7123.firebasestorage.app",
+  messagingSenderId: "615348054695",
+  appId: "1:615348054695:web:d3324a6ea5a846043cc982",
+  measurementId: "G-80SSN9RTL1"
 };
-
 
 // =====================================================
 // 🚀 INITIALIZE FIREBASE
@@ -39,7 +38,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-
+// NOTE ON "Student ID save नहीं हो रहा" ISSUE:
+// अगर save बार-बार fail हो रहा है तो सबसे common कारण Firebase Realtime
+// Database की Security Rules होती हैं। नए Firebase projects में by-default
+// Rules कुछ इस तरह होते हैं:
+//   { "rules": { ".read": false, ".write": false } }
+// चूंकि यह app बिना Firebase Authentication (login) के सीधे Database को
+// पढ़ता/लिखता है, इसलिए Rules को Firebase Console > Realtime Database >
+// Rules में जाकर कम-से-कम इस तरह set करें (testing के लिए):
+//   { "rules": { ".read": true, ".write": true } }
+// Production में इसे ज़्यादा सुरक्षित बनाना बेहतर है, लेकिन अभी save काम
+// करने के लिए यह ज़रूरी है। नीचे दिए गए catch blocks अब असली Firebase
+// error (जैसे PERMISSION_DENIED) भी दिखाएँगे ताकि पता चल सके कि दिक्कत
+// कहाँ है।
 
 
 // =====================================================
